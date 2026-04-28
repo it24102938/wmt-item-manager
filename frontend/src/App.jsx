@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_URL = 'https://wmt-item-manager-production-d83b.up.railway.app';
+
 function App() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    // TODO (Student): Add missing fields for the state
+    description: '',
+    category: '',
+    discountPercentage: '',
   });
 
   const fetchItems = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/items');
+      const res = await axios.get(`${API_URL}/api/items`);
       setItems(res.data);
     } catch (err) {
       console.error('Error fetching items:', err);
@@ -29,12 +33,14 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/items', formData);
-      fetchItems(); // Refresh the list
+      await axios.post(`${API_URL}/api/items`, formData);
+      fetchItems();
       setFormData({
         name: '',
         price: '',
-        // TODO (Student): Clear the missing fields here
+        description: '',
+        category: '',
+        discountPercentage: '',
       });
     } catch (err) {
       console.error('Error creating item:', err);
@@ -42,9 +48,12 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    // TODO (Student): Implement the delete functionality here
-    // Hint: Use axios.delete() and then call fetchItems()
-    console.log(`Delete item with ID: ${id}`);
+    try {
+      await axios.delete(`${API_URL}/api/items/${id}`);
+      fetchItems();
+    } catch (err) {
+      console.error('Error deleting item:', err);
+    }
   };
 
   return (
@@ -96,6 +105,18 @@ function App() {
             />
           </div>
 
+          <div className="form-group">
+            <label>Discount Percentage (%):</label>
+            <input
+              type="number"
+              name="discountPercentage"
+              value={formData.discountPercentage}
+              onChange={handleChange}
+              min="0"
+              max="100"
+            />
+          </div>
+
           <button type="submit" className="btn-primary">Add Item</button>
         </form>
       </div>
@@ -111,33 +132,9 @@ function App() {
                 <div className="item-details">
                   <h3>{item.name}</h3>
                   <p>Price: ${item.price}</p>
-                  {/* TODO (Student): Display 'description' and 'category' here */}
-                  </div>
-
-          <div className="form-group">
-            <label>description:</label>
-            <input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-           <div className="container">
-      <h1>Item Manager</h1>
-
-      
-          <div className="form-group">
-            <label>category:</label>
-            <input
-              type="text"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-            />
-          </div>
+                  <p>Description: {item.description || 'N/A'}</p>
+                  <p>Category: {item.category || 'N/A'}</p>
+                  <p>Discount: {item.discountPercentage || 0}%</p>
                 </div>
                 <div className="item-actions">
                   <button
